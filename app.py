@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_mongoengine import MongoEngine
 
-from blockchain import Blockchain
+from block_chain.blockchain import Blockchain
 from wallets.wallet import Wallet
 
 
