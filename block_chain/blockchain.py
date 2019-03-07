@@ -7,6 +7,15 @@ from utils.security.verification import Verification
 from wallets.wallet import Wallet
 
 
+from transactions.transaction import Transaction
+from blocks.block import Block
+from rewards.mining_reward import MiningRewards
+from utils.converter import Converter
+from utils.file_handler import FileHandler
+from utils.security.verification import Verification
+from wallets.wallet import Wallet
+
+
 class Blockchain(object):
 
     def __init__(self, hosting_node_id):
@@ -38,8 +47,8 @@ class Blockchain(object):
 
     def _extract_blockchain_and_open_transactions_block_from_file_content(self, file_content):
 
-        block_chain = Converter.de_serialize_object(file_content[0][:-1])
-        transactions_block = Converter.de_serialize_object(file_content[1])
+        block_chain = Converter.de_serialize_file_object(file_content[0][:-1])
+        transactions_block = Converter.de_serialize_file_object(file_content[1])
         return block_chain, transactions_block
 
     def _update_current_block_chain(self, blockchain):
@@ -47,8 +56,7 @@ class Blockchain(object):
         updated_blockchain = []
 
         for block in blockchain:
-            trans_block = [Transaction(trans['sender'], trans['recipient'], trans['signature'], trans['amount'])
-                           for trans in block['transactions']]
+            trans_block = [Transaction(trans['sender'], trans['recipient'], trans['signature'], trans['amount']) for trans in block['transactions']]
             block = Block(block['index'], block['previous_hash'], trans_block, block['proof'], block['timestamp'])
             updated_blockchain.append(block)
 
@@ -64,10 +72,10 @@ class Blockchain(object):
         self._open_transactions = updated_transactions
 
     def save_data(self):
-        """Save blockchain and transactions"""
+        """Save blockchain and transaction to file"""
 
         #Todo
-        # Will add so it stores it to a database but for now it stored in a file
+        # Saves to file will change so it saves to a database
         try:
 
             FileHandler.clear_file_content()
@@ -84,7 +92,7 @@ class Blockchain(object):
                                                     block.proof, block.timestamp) for block in self.chain]]
 
     def _convert_object_in_transaction_block_to_json(self):
-        return [tx.to_json() for trans in self._open_transactions]
+        return [trans.to_json() for trans in self._open_transactions]
 
     def proof_of_work(self):
         """Generate a proof of work for the open transactions, the hash of the previous

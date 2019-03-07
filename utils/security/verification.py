@@ -34,7 +34,7 @@ class Verification(object):
     def verify_transactions(cls, open_transactions, get_balance, check_funds=True):
         """"""
 
-        return all([cls.verify_transaction(tx, get_balance, check_funds=False) for tx in open_transactions])
+        return all([cls.verify_transaction(trans, get_balance, check_funds=False) for trans in open_transactions])
 
 
     @classmethod
