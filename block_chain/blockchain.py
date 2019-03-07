@@ -2,7 +2,7 @@ from transactions.transaction import Transaction
 from blocks.block import Block
 from rewards.mining_reward import MiningRewards
 from utils.converter import Converter
-from utils.files import FileHandler
+from utils.file_handler import FileHandler
 from utils.security.verification import Verification
 from wallets.wallet import Wallet
 
@@ -38,8 +38,8 @@ class Blockchain(object):
 
     def _extract_blockchain_and_open_transactions_block_from_file_content(self, file_content):
 
-        block_chain = Converter.de_serialize_file_object(file_content[0][:-1])
-        transactions_block = Converter.de_serialize_file_object(file_content[1])
+        block_chain = Converter.de_serialize_object(file_content[0][:-1])
+        transactions_block = Converter.de_serialize_object(file_content[1])
         return block_chain, transactions_block
 
     def _update_current_block_chain(self, blockchain):
@@ -55,18 +55,15 @@ class Blockchain(object):
 
     def _update_current_open_transactions(self, open_transactions):
         """"""
+        # We need to convert  the loaded data because Transactions should use OrderedDict
         updated_transactions = []
-        for trans in open_transactions:
-            updated_transaction = Transaction(trans['sender'], trans['recipient'], trans['signature'], trans['amount'])
+        for tx in open_transactions:
+            updated_transaction = Transaction(tx['sender'], tx['recipient'], tx['signature'], tx['amount'])
             updated_transactions.append(updated_transaction)
         self._open_transactions = updated_transactions
 
     def save_data(self):
         """Save blockchain + open transactions snapshot to a file."""
-
-
-        #Todo
-        # Replace the fileHandler with a database
         try:
 
             FileHandler.clear_file_content()
@@ -79,7 +76,7 @@ class Blockchain(object):
 
     def _create_savable_block(self):
         return [block.to_json() for block in [Block(block.index, block.previous_hash,
-                                                    [trans.to_json() for trans in block.transactions],
+                                                    [tx.to_json() for tx in block.transactions],
                                                     block.proof, block.timestamp) for block in self.chain]]
 
     def _convert_object_in_transaction_block_to_json(self):

@@ -1,72 +1,66 @@
-from utils.converter import Converter
+from collections import OrderedDict
+
 from utils.printable import Display
-from utils.security.verification import Verification
-
-
-class Balance(object):
-
-    @classmethod
-    def get_balance(cls, participant, block_chain, open_transactions):
-
-        amount_sent = Transaction.get_sender_transaction(participant, block_chain)
-        amount_received = Transaction.get_recipient_transaction(participant, open_transactions)
-
-
-        open_tx_sender = Transaction.get_all_open_user_transaction(participant, open_transactions)
-        amount_sent.append(open_tx_sender)
-
-        bal_sent = cls._calculate_balance(amount_sent)
-        bal_received = cls._calculate_balance(amount_received)
-
-        return bal_received - bal_sent
-
-    @classmethod
-    def _calculate_balance(cls, amount_list):
-        return sum([sum(amount) for amount in amount_list if len(amount) > 0])
 
 
 class Transaction(Display):
 
-    def __init__(self, sender, recipient, amount):
+    def __init__(self, sender, recipient, signature='', amount=0):
         self.sender = sender
         self.recipient = recipient
+        self.signature = signature
         self.amount = amount
-       # self._transactions = []
 
-    def create_new_transaction(self):
-        """"""
-
-        open_transactions = []
-
-        transaction = Transaction(self.sender, self.recipient, self.amount)
-
-        if Verification.verify_transaction(transaction, Balance.get_balance):
-            open_transactions.append(transaction)
-        self._transactions = open_transactions
-
-    def get_transaction(self):
-        return self._transactions
+    @staticmethod
+    def convert_all_transaction_block_to_ordered_dict(transactions_block):
+        return [tx.to_ordered_dict() for tx in transactions_block]
 
     @classmethod
-    def get_transactions_from_block(cls, block):
-        """"""
-        return [cls(transaction['sender'], transaction['recipient'], transaction['amount'])
-                for transaction in block['transactions']]
+    def get_balance(cls, client, block_chain, open_transactions):
+        return cls._process_transaction(client, block_chain, open_transactions)
 
-    def to_ordered_dictionary(self):
+    @classmethod
+    def _process_transaction(cls, client, block_chain, open_transactions):
         """"""
-        return Converter.to_ordered_dict([('sender', self.sender), ('recipient', self.recipient),
-                                          ('amount', self.amount)])
 
-    @staticmethod
-    def get_sender_transaction(participant, block_chain):
+        sent_coins_list = Transaction.get_all_sent_coins_transactions_list(block_chain, client)
+        open_trans_coins_list = Transaction.get_all_open_sent_transactions_list(open_transactions, client)
+
+        sent_coins_list.append(open_trans_coins_list)
+
+        processed_received_coins = Transaction.get_all_processed_received_coins_list(client, block_chain)
+
+        amount_sent = Transaction.calculate_amount(sent_coins_list)
+        amount_received = Transaction.calculate_amount(processed_received_coins)
+
+        return amount_received - amount_sent
+
+    @classmethod
+    def get_all_sent_coins_transactions_list(cls, block_chain, participant):
         return [[tx.amount for tx in block.transactions if tx.sender == participant] for block in block_chain]
 
-    @staticmethod
-    def get_recipient_transaction(participant, open_transactions):
+    @classmethod
+    def get_all_open_sent_transactions_list(cls, open_transactions, participant):
         return [tx.amount for tx in open_transactions if tx.sender == participant]
 
     @staticmethod
-    def get_all_open_user_transaction(participant, open_transactions):
-        """"""
-        return [tx.amount for tx in open_transactions if tx.sender == participant]
+    def get_all_processed_received_coins_list(participant, block_chain):
+        return [[tx.amount for tx in block.transactions if tx.recipient == participant] for block in block_chain]
+
+    @classmethod
+    def _calculate_balance(cls, sent_coins_list, received_coins_list):
+
+        amount_sent = cls.calculate_amount(sent_coins_list)
+        received_coins = cls.calculate_amount(received_coins_list)
+
+        return received_coins - amount_sent
+
+    @classmethod
+    def calculate_amount(cls, amount_list):
+        return sum([sum(amount) for amount in amount_list if len(amount) > 0])
+
+    def to_ordered_dict(self):
+        return OrderedDict([('sender', self.sender), ('recipient', self.recipient), ('amount', self.amount)])
+
+    def to_json(self):
+        return self.__dict__.copy()
