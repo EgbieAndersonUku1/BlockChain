@@ -38,8 +38,8 @@ class Blockchain(object):
 
     def _extract_blockchain_and_open_transactions_block_from_file_content(self, file_content):
 
-        block_chain = Converter.de_serialize_object(file_content[0][:-1])
-        transactions_block = Converter.de_serialize_object(file_content[1])
+        block_chain = Converter.de_serialize_file_object(file_content[0][:-1])
+        transactions_block = Converter.de_serialize_file_object(file_content[1])
         return block_chain, transactions_block
 
     def _update_current_block_chain(self, blockchain):

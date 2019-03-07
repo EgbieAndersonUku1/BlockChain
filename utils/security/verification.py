@@ -1,5 +1,10 @@
+from Crypto.Hash import SHA256
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
+
+from blocks.block import Block
+from utils.converter import Converter
 from utils.security.hasher import HashImplementer
-from block.block import Block
 
 
 class Verification(object):
@@ -21,16 +26,44 @@ class Verification(object):
     @classmethod
     def check_proof_validation(cls, transaction, last_hash, proof):
         """"""
-        guess = (str([tx.to_json() for tx in transaction]) + str(last_hash) + str(proof)).encode()
+        guess = (str([transaction.to_json() for transaction in transaction]) + str(last_hash) + str(proof)).encode()
         hash_guess = HashImplementer.hash_string_using_sha256(guess)
         return hash_guess[:2] == "00"
 
     @classmethod
-    def verify_transactions(cls, open_transactions, get_balance):
+    def verify_transactions(cls, open_transactions, get_balance, check_funds=True):
         """"""
-        return all([cls.verify_transaction(tx, get_balance) for tx in open_transactions])
+
+        return all([cls.verify_transaction(tx, get_balance, check_funds=False) for tx in open_transactions])
+
 
     @classmethod
-    def verify_transaction(cls, transaction, get_balance):
+    def verify_transaction(cls, transaction, get_balance, check_funds=True):
         """"""
-        return get_balance(transaction.sender, None) >= transaction.amount
+        if check_funds:
+            return get_balance() >= transaction.amount
+        return None
+
+
+class TransactionSignatureVerifier(object):
+
+    def __init__(self, transaction):
+
+        self.transaction = transaction
+
+    def verify_transaction_signature(self):
+
+        public_key = self._get_public_key(self.transaction)
+        verifier = PKCS1_v1_5.new(public_key)
+        pay_load_hash = self._create_payload_hash(self.transaction)
+
+        return verifier.verify(pay_load_hash, Converter.string_to_binary(self.transaction.signature))
+
+    def _get_public_key(self, transaction):
+        return RSA.importKey(Converter.string_to_binary(transaction.sender))
+
+    def _create_payload_hash(self, transaction):
+        data = ("{}{}{}".format(transaction.sender, transaction.recipient, transaction.amount).encode("utf8"))
+        return SHA256.new(data)
+
+

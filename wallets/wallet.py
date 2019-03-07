@@ -1,5 +1,5 @@
 from utils.converter import Converter
-from utils.file_handler import FileHandler
+from utils.files import FileHandler
 from utils.security.keys_gen import KeysGen
 from utils.security.signer import SignSignature
 from utils.security.verification import TransactionSignatureVerifier
@@ -21,8 +21,8 @@ class Wallet(object):
         """"""
         private_key, public_key = KeysGen.gen_private_and_public_keys()
 
-        private_key_str = Converter.binary_to_string(private_key.exportKey(format="DER"))
-        public_key_str = Converter.binary_to_string(public_key.exportKey(format="DER"))
+        private_key_str = Converter.to_string(private_key.exportKey(format="DER"))
+        public_key_str = Converter.to_string(public_key.exportKey(format="DER"))
 
         return private_key_str, public_key_str
 
