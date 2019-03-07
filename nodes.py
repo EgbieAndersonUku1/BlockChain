@@ -2,13 +2,11 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_script import Manager, Server
 from flask_cors import CORS
 
-from wallets.wallet import Wallet
-from blockchain import Blockchain
+from app import wallet, block_chain
+from app import create_app
 
-app = Flask(__name__)
 
-wallet = Wallet()
-block_chain = Blockchain(wallet.public_key)
+app = create_app()
 manager = Manager(app)
 CORS(app)
 
