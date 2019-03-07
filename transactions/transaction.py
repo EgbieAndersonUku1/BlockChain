@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from utils.printable import Display
+from utils.show import Display
 
 
 class Transaction(Display):

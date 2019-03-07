@@ -2,9 +2,8 @@ from time import time
 
 from transactions.transaction import Transaction
 from utils.converter import Converter
+from utils.show import Display
 from utils.security.hasher import HashImplementer
-
-from utils.display import Display
 
 
 class Block(Display):
