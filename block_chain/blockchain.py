@@ -38,8 +38,8 @@ class Blockchain(object):
 
     def _extract_blockchain_and_open_transactions_block_from_file_content(self, file_content):
 
-        block_chain = Converter.de_serialize_file_object(file_content[0][:-1])
-        transactions_block = Converter.de_serialize_file_object(file_content[1])
+        block_chain = Converter.de_serialize_object(file_content[0][:-1])
+        transactions_block = Converter.de_serialize_object(file_content[1])
         return block_chain, transactions_block
 
     def _update_current_block_chain(self, blockchain):
@@ -105,13 +105,13 @@ class Blockchain(object):
         """ Returns the last value of the current blockchain. """
         return None if len(self.chain) < 1 else self.chain[-1]
 
-    def add_transaction(self, recipient, sender, signature, amount=1.0):
+    def add_transaction(self, recipient, sender, signature, amount=10.0):
         """ Append a new value as well as the last blockchain value to the blockchain.
 
         Arguments:
             :sender: The sender of the coins.
             :recipient: The recipient of the coins.
-            :amount: The amount of coins sent with the transaction (default = 1.0)
+            :amount: The amount of coins sent with the transaction (default = 10.0)
         """
 
         if self._is_hosting_node_none():
