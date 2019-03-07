@@ -47,7 +47,8 @@ class Blockchain(object):
         updated_blockchain = []
 
         for block in blockchain:
-            trans_block = [Transaction(tx['sender'], tx['recipient'], tx['signature'], tx['amount']) for tx in block['transactions']]
+            trans_block = [Transaction(trans['sender'], trans['recipient'], trans['signature'], trans['amount'])
+                           for trans in block['transactions']]
             block = Block(block['index'], block['previous_hash'], trans_block, block['proof'], block['timestamp'])
             updated_blockchain.append(block)
 
@@ -57,13 +58,16 @@ class Blockchain(object):
         """"""
         # We need to convert  the loaded data because Transactions should use OrderedDict
         updated_transactions = []
-        for tx in open_transactions:
-            updated_transaction = Transaction(tx['sender'], tx['recipient'], tx['signature'], tx['amount'])
+        for trans in open_transactions:
+            updated_transaction = Transaction(trans['sender'], trans['recipient'], trans['signature'], trans['amount'])
             updated_transactions.append(updated_transaction)
         self._open_transactions = updated_transactions
 
     def save_data(self):
-        """Save blockchain + open transactions snapshot to a file."""
+        """Save blockchain and transactions"""
+
+        #Todo
+        # Will add so it stores it to a database but for now it stored in a file
         try:
 
             FileHandler.clear_file_content()
@@ -76,11 +80,11 @@ class Blockchain(object):
 
     def _create_savable_block(self):
         return [block.to_json() for block in [Block(block.index, block.previous_hash,
-                                                    [tx.to_json() for tx in block.transactions],
+                                                    [trans.to_json() for trans in block.transactions],
                                                     block.proof, block.timestamp) for block in self.chain]]
 
     def _convert_object_in_transaction_block_to_json(self):
-        return [tx.to_json() for tx in self._open_transactions]
+        return [tx.to_json() for trans in self._open_transactions]
 
     def proof_of_work(self):
         """Generate a proof of work for the open transactions, the hash of the previous
@@ -105,13 +109,13 @@ class Blockchain(object):
         """ Returns the last value of the current blockchain. """
         return None if len(self.chain) < 1 else self.chain[-1]
 
-    def add_transaction(self, recipient, sender, signature, amount=10.0):
+    def add_transaction(self, recipient, sender, signature, amount=1.0):
         """ Append a new value as well as the last blockchain value to the blockchain.
 
         Arguments:
             :sender: The sender of the coins.
             :recipient: The recipient of the coins.
-            :amount: The amount of coins sent with the transaction (default = 10.0)
+            :amount: The amount of coins sent with the transaction (default = 1.0)
         """
 
         if self._is_hosting_node_none():
