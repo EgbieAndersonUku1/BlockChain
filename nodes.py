@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_from_directory
+from flask import jsonify, request, send_from_directory
 from flask_script import Manager, Server
 from flask_cors import CORS
 
@@ -154,11 +154,7 @@ def mine_block():
 
 @app.route("/chain", methods=["GET"])
 def get_chain():
-
-    b = block_chain.convert_entire_block_chain_to_dict()
-    return jsonify(results=b), 200
-
-
+    return jsonify(results=block_chain.convert_entire_block_chain_to_dict()), 200
 
 
 
