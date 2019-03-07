@@ -2,7 +2,7 @@ from transactions.transaction import Transaction
 from blocks.block import Block
 from rewards.mining_reward import MiningRewards
 from utils.converter import Converter
-from utils.file_handler import FileHandler
+from utils.files import FileHandler
 from utils.security.verification import Verification
 from wallets.wallet import Wallet
 
