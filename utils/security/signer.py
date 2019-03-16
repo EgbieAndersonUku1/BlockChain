@@ -1,7 +1,6 @@
-from Crypto.Signature import PKCS1_v1_5
-from Crypto.PublicKey import RSA
-
-from Crypto.Hash import SHA256
+from Cryptodome.Signature import PKCS1_v1_5
+from Cryptodome.PublicKey import RSA
+from Cryptodome.Hash import SHA256
 
 from utils.converter import Converter
 

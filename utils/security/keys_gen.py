@@ -1,5 +1,5 @@
-from Crypto.PublicKey import RSA
-import Crypto.Random
+from Cryptodome.PublicKey import RSA
+from Cryptodome import Random
 
 
 class KeysGen(object):
@@ -8,6 +8,6 @@ class KeysGen(object):
     def gen_private_and_public_keys(bits=1024):
         """"""
 
-        private_key = RSA.generate(bits=bits, randfunc=Crypto.Random.new().read)
+        private_key = RSA.generate(bits=bits, randfunc=Random.new().read)
         public_key = private_key.publickey()
         return private_key, public_key
